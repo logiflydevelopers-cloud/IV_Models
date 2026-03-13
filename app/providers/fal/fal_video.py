@@ -29,7 +29,7 @@ def text_to_video_kling (prompt: str):
     }
 
     try:
-        result = fal.subscribe(
+        result = fal.run(
             KLING_MODEL_ID,
             arguments=arguments
         )

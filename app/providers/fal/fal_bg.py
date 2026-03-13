@@ -24,7 +24,7 @@ def remove_background(image_url: str):
     }
 
     try:
-        result = fal.subscribe(
+        result = fal.run(
             BRIA_BG_REMOVE_MODEL,
             arguments=arguments
         )
@@ -60,7 +60,7 @@ def change_background(image_url: str, prompt: str):
     }
 
     try:
-        result = fal.subscribe(
+        result = fal.run(
             BG_DIFFUSION_MODEL,
             arguments=arguments
         )
