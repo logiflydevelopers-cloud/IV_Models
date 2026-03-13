@@ -7,7 +7,7 @@ from app.providers.fal.fal_video import (
     generate_character_video
 )
 
-from app.providers.fal.fal_image import charcter_generation
+from app.providers.fal.fal_image import character_generation
 from app.providers.fal.fal_edit import edit_character
 from app.providers.fal.fal_bg import remove_background, change_background
 
@@ -49,7 +49,7 @@ MODEL_REGISTRY = {
     # IMAGE GENERATION
     # =========================================
     "image_generation": {
-        "realistic_character": charcter_generation,
+        "realistic_character": character_generation,
         "anime_character": anime_generation
     },
 
@@ -58,8 +58,7 @@ MODEL_REGISTRY = {
     # =========================================
     "image_edit": {
         "character_edit": edit_character,
-        "anime_edit": edit_anime,
-        "background_change": change_background
+        "anime_edit": edit_anime
     },
 
     # =========================================
@@ -70,10 +69,32 @@ MODEL_REGISTRY = {
     },
 
     # =========================================
-    # UPSCALE
+    # BACKGROUND CHANGE
     # =========================================
-    "upscale": {
+    "background_change": {
+        "fal_bg_change": change_background
+    },
+
+    # =========================================
+    # IMAGE UPSCALE
+    # =========================================
+    "image_upscale": {
         "recraft": upscale_image
     }
 
 }
+
+
+def get_model(feature: str, model: str):
+
+    if feature not in MODEL_REGISTRY:
+        raise ValueError(f"Invalid feature: {feature}")
+
+    feature_models = MODEL_REGISTRY[feature]
+
+    if model not in feature_models:
+        raise ValueError(
+            f"Invalid model '{model}' for feature '{feature}'"
+        )
+
+    return feature_models[model]

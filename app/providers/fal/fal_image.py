@@ -10,7 +10,7 @@ GENERATION_MODEL = "fal-ai/qwen-image-2512"
 # CHARACTER GENERATION
 # =========================================================
 
-def charcter_generation(prompt: str):
+def character_generation(prompt: str):
     """
     Generate Realistic Characters using Qwen-Image-2512
     """
