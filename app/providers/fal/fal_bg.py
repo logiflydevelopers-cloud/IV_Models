@@ -14,10 +14,12 @@ BG_DIFFUSION_MODEL = "fal-ai/image-editing/background-change"
 # BACKGROUND REMOVE
 # =========================================================
 
-def remove_background(image_url: str):
+def remove_background(inputs):
     """
     Remove background using BRIA model
     """
+    image_url = inputs["image_url"]
+
 
     arguments = {
         "image_url": image_url
@@ -45,10 +47,13 @@ def remove_background(image_url: str):
 # BACKGROUND DIFFUSION / CHANGE
 # =========================================================
 
-def change_background(image_url: str, prompt: str):
+def change_background(inputs):
     """
     Replace background using diffusion model
     """
+
+    prompt = inputs["prompt"]
+    image_url = inputs["image_url"]
 
     arguments = {
         "image_url": image_url,
