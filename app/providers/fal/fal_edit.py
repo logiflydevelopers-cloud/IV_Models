@@ -6,6 +6,8 @@ from app.providers.fal.fal_client import fal
 
 EDIT_MODEL = "fal-ai/qwen-image-2/pro/edit"
 
+NANO_BANANA_2_EDIT = "fal-ai/nano-banana-2/edit"
+
 # =========================================================
 # CHARACTER EDIT
 # =========================================================
@@ -44,3 +46,34 @@ def edit_character(image_url: list[str], prompt: str):
     except Exception as e:
         raise RuntimeError(f"qwen-image-Edit failed: {e}")
     
+
+async def image_edit(inputs):
+
+    prompt = inputs["prompt"]
+    image_url = inputs["image_url"]
+
+    arguments = {
+        "prompt": prompt,
+        "num_images": 1,
+        "aspect_ratio": "9:16",
+        "output_format": "png",
+        "image_urls": image_url,
+        "resolution": "1K",
+        "limit_generations": True
+        }
+
+    try:
+        result = fal.run(
+            NANO_BANANA_2_EDIT,
+            arguments=arguments
+        )
+
+        video = result.get("video")
+
+        if not video:
+            raise RuntimeError(f"No video returned from fal.ai: {result}")
+
+        return video["url"]
+
+    except Exception as e:
+        raise RuntimeError(f"fal.ai Kling Element failed: {e}")

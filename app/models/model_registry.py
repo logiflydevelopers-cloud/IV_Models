@@ -4,11 +4,12 @@ from app.providers.fal.fal_video import (
     text_to_video_veo,
     image_to_video_wan,
     image_to_video_kling_element,
+    image_to_video_veo,
     generate_character_video
 )
 
 from app.providers.fal.fal_image import character_generation
-from app.providers.fal.fal_edit import edit_character
+from app.providers.fal.fal_edit import edit_character, image_edit
 from app.providers.fal.fal_bg import remove_background, change_background
 
 # Replicate Providers
@@ -42,6 +43,7 @@ MODEL_REGISTRY = {
         "kling_element": image_to_video_kling_element,
         "hailuo": image_to_video_hailuo,
         "anime_video": anime_video,
+        "veo_i2v": image_to_video_veo,
         "character_video": generate_character_video
     },
 
@@ -58,7 +60,8 @@ MODEL_REGISTRY = {
     # =========================================
     "image_edit": {
         "character_edit": edit_character,
-        "anime_edit": edit_anime
+        "anime_edit": edit_anime,
+        "nano_banana": image_edit
     },
 
     # =========================================
