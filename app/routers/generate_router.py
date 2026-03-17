@@ -37,18 +37,46 @@ async def generate(request: GenerationRequest):
         )
 
     # ======================================================
-    # PREPROCESS INPUTS (IMPORTANT FIX)
+    # PREPROCESS INPUTS (FINAL CLEAN VERSION)
     # ======================================================
     inputs = request.inputs or {}
 
     print("📦 ORIGINAL INPUTS:", inputs)
 
-    # 🔥 TEMP FIX for your schema mismatch
-    # (convert image_1 → image if needed)
-    if "image_1" in inputs and "image" not in inputs:
-        inputs["image"] = inputs["image_1"]
+    try:
+        # =========================================
+        # 🔥 COLLECT ALL IMAGES (max 5)
+        # =========================================
+        image_keys = [f"image_{i}" for i in range(1, 6)]
+        images = [inputs[k] for k in image_keys if k in inputs]
 
-    print("🛠️ FINAL INPUTS:", inputs)
+        print("🖼️ COLLECTED IMAGES:", images)
+
+        # =========================================
+        # 🔥 VALIDATION
+        # =========================================
+        if not images:
+            raise Exception("At least one image is required")
+
+        if len(images) > 5:
+            raise Exception("Maximum 5 images allowed")
+
+        # =========================================
+        # 🔥 NORMALIZATION (UNIVERSAL FORMAT)
+        # =========================================
+
+        # For single-image models
+        inputs["image_url"] = images[0]
+        inputs["image"] = images[0]
+
+        # For multi-image models
+        inputs["images"] = images
+
+        print("🛠️ FINAL INPUTS:", inputs)
+
+    except Exception as e:
+        print("❌ INPUT PROCESSING FAILED:", str(e))
+        raise HTTPException(status_code=400, detail=str(e))
 
     # ======================================================
     # RUN MODEL
@@ -62,7 +90,7 @@ async def generate(request: GenerationRequest):
 
     except Exception as e:
         print("❌ MODEL EXECUTION FAILED")
-        traceback.print_exc()   # 🔥 FULL STACK TRACE
+        traceback.print_exc()
 
         raise HTTPException(
             status_code=500,
