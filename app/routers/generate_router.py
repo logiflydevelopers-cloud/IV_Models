@@ -46,5 +46,5 @@ async def generate(request: GenerationRequest):
         "status": "success",
         "feature": request.feature,
         "model": request.model,
-        "result": result
+        "result_url": result
     }
