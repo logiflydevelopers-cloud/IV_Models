@@ -48,32 +48,59 @@ def edit_character(image_url: list[str], prompt: str):
     
 
 async def image_edit(inputs):
+    try:
+        # ✅ Validate prompt
+        prompt = inputs.get("prompt")
+        if not prompt:
+            raise ValueError("Prompt is required")
 
-    prompt = inputs["prompt"]
-    image_url = inputs["image_url"]
+        # ✅ Collect all images dynamically (image_1, image_2, ...)
+        images = [
+            value for key, value in inputs.items()
+            if key.startswith("image_") and value
+        ]
 
-    arguments = {
-        "prompt": prompt,
-        "num_images": 1,
-        "aspect_ratio": "9:16",
-        "output_format": "png",
-        "image_urls": image_url,
-        "resolution": "1K",
-        "limit_generations": True
+        if not images:
+            raise ValueError("At least one image is required")
+
+        # ✅ Prepare payload for FAL
+        arguments = {
+            "prompt": prompt,
+            "num_images": 1,
+            "aspect_ratio": "9:16",
+            "output_format": "png",
+            "image_urls": images,  # ✅ MUST be list
+            "resolution": "1K",
+            "limit_generations": True
         }
 
-    try:
+        print("\n🟡 FAL REQUEST PAYLOAD:")
+        print(arguments)
+
+        # ✅ Run model
         result = fal.run(
             NANO_BANANA_2_EDIT,
             arguments=arguments
         )
 
-        video = result.get("video")
+        print("\n🟢 FAL RESPONSE:")
+        print(result)
 
-        if not video:
-            raise RuntimeError(f"No video returned from fal.ai: {result}")
+        # ✅ Handle response safely
+        # (depends on model response format)
+        if "images" in result and len(result["images"]) > 0:
+            return result["images"][0]["url"]
 
-        return video["url"]
+        if "image" in result:
+            return result["image"]["url"]
+
+        if "video" in result:
+            return result["video"]["url"]
+
+        # fallback debug
+        raise RuntimeError(f"Unexpected FAL response format: {result}")
 
     except Exception as e:
-        raise RuntimeError(f"fal.ai Kling Element failed: {e}")
+        print("\n🔴 ERROR in image_edit:")
+        print(str(e))
+        raise RuntimeError(f"fal.ai nano-banana edit failed: {e}")
