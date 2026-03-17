@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any
 from app.schemas.generate_schema import GenerationRequest
+import traceback
 
 from app.models.model_registry import get_model
 
