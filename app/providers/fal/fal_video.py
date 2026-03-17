@@ -83,101 +83,104 @@ async def text_to_video_veo(inputs):
 # IMAGE-TO-VIDEO
 # =========================================================
 
+def extract_images(inputs):
+    return [
+        value for key, value in inputs.items()
+        if key.startswith("image_") and value
+    ]
+
 async def image_to_video_wan(inputs):
-
-    prompt = inputs["prompt"]
-    image_url = inputs["image_url"]
-
-    arguments = {
-        "prompt": prompt,
-        "negative_prompt": "bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, malformed limbs, fused fingers, still picture, cluttered background, three legs, many people in the background, walking backwards",
-        "image_url": image_url,
-        "num_frames": 81,
-        "frames_per_second": 16,
-        "resolution": "720p",
-        "num_inference_steps": 30,
-        "guide_scale": 5,
-        "shift": 5,
-        "enable_safety_checker": False,
-        "enable_prompt_expansion": False,
-        "acceleration": "regular",
-        "aspect_ratio": "9:16"
-    }
-
     try:
-        result = fal.run(
-            WAN_MODEL_ID,
-            arguments=arguments
-        )
+        prompt = inputs.get("prompt")
+        if not prompt:
+            raise ValueError("Prompt is required")
 
-        video = result.get("video")
+        images = extract_images(inputs)
+        if not images:
+            raise ValueError("At least one image is required")
 
-        if not video:
-            raise RuntimeError(f"No video returned from fal.ai: {result}")
+        arguments = {
+            "prompt": prompt,
+            "negative_prompt": "bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, malformed limbs, fused fingers, still picture, cluttered background, three legs, many people in the background, walking backwards",
+            "image_url": images[0],  # ✅ WAN supports single image
+            "num_frames": 81,
+            "frames_per_second": 16,
+            "resolution": "720p",
+            "num_inference_steps": 30,
+            "guide_scale": 5,
+            "shift": 5,
+            "enable_safety_checker": False,
+            "enable_prompt_expansion": False,
+            "acceleration": "regular",
+            "aspect_ratio": "9:16"
+        }
 
-        return video["url"]
+        result = fal.run(WAN_MODEL_ID, arguments=arguments)
+
+        if "video" in result:
+            return result["video"]["url"]
+
+        raise RuntimeError(f"Unexpected WAN response: {result}")
 
     except Exception as e:
-        raise RuntimeError(f"fal.ai Wan failed: {e}")
+        raise RuntimeError(f"fal.ai WAN failed: {e}")
     
 async def image_to_video_kling_element(inputs):
-
-    prompt = inputs["prompt"]
-    image_url = inputs["image_url"]
-
-    arguments = {
-        "prompt": prompt,
-        "image_url": image_url,
-        "duration": 5,
-        "aspect_ratio": "9:16"
-    }
-
     try:
-        result = fal.run(
-            KLING_ELEMENT_MODEL_ID,
-            arguments=arguments
-        )
+        prompt = inputs.get("prompt")
+        if not prompt:
+            raise ValueError("Prompt is required")
 
-        video = result.get("video")
+        images = extract_images(inputs)
+        if not images:
+            raise ValueError("At least one image is required")
 
-        if not video:
-            raise RuntimeError(f"No video returned from fal.ai: {result}")
+        arguments = {
+            "prompt": prompt,
+            "image_urls": images,  # ✅ MULTI IMAGE SUPPORT
+            "duration": 5,
+            "aspect_ratio": "9:16"
+        }
 
-        return video["url"]
+        result = fal.run(KLING_ELEMENT_MODEL_ID, arguments=arguments)
+
+        if "video" in result:
+            return result["video"]["url"]
+
+        raise RuntimeError(f"Unexpected Kling response: {result}")
 
     except Exception as e:
         raise RuntimeError(f"fal.ai Kling Element failed: {e}")
     
 
 async def image_to_video_veo(inputs):
+    try:
+        prompt = inputs.get("prompt")
+        if not prompt:
+            raise ValueError("Prompt is required")
 
-    prompt = inputs["prompt"]
-    image_url = inputs["image_url"]
+        images = extract_images(inputs)
+        if not images:
+            raise ValueError("At least one image is required")
 
-    arguments = {
-        "prompt": prompt,
-        "aspect_ratio": "9:16",
-        "duration": "6s",
-        "resolution": "720p",
-        "generate_audio": True,
-        "image_url": image_url
+        arguments = {
+            "prompt": prompt,
+            "aspect_ratio": "9:16",
+            "duration": "6s",
+            "resolution": "720p",
+            "generate_audio": True,
+            "image_url": images[0],  # ✅ single image
         }
 
-    try:
-        result = fal.run(
-            VEO_IMAGE_TO_VIDEO_MODEL_ID,
-            arguments=arguments
-        )
+        result = fal.run(VEO_IMAGE_TO_VIDEO_MODEL_ID, arguments=arguments)
 
-        video = result.get("video")
+        if "video" in result:
+            return result["video"]["url"]
 
-        if not video:
-            raise RuntimeError(f"No video returned from fal.ai: {result}")
-
-        return video["url"]
+        raise RuntimeError(f"Unexpected VEO response: {result}")
 
     except Exception as e:
-        raise RuntimeError(f"fal.ai Wan failed: {e}")
+        raise RuntimeError(f"fal.ai VEO failed: {e}")
     
 # =========================================================
 # CHARACTER IMAGE-TO-VIDEO
