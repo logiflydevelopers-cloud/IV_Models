@@ -65,7 +65,7 @@ MODEL_REGISTRY = {
     },
 
     "couple_wallpaper": {
-        "nano_banana": image_edit
+        "nano_banana_1": image_edit
     },
 
     # =========================================
