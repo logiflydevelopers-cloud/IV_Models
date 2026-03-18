@@ -64,6 +64,10 @@ MODEL_REGISTRY = {
         "nano_banana": image_edit
     },
 
+    "couple_wallpaper": {
+        "nano_banana": image_edit
+    },
+
     # =========================================
     # BACKGROUND REMOVE
     # =========================================
