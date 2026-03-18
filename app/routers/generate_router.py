@@ -12,7 +12,6 @@ router = APIRouter(
 )
 
 
-
 @router.post("/generate")
 async def generate(request: GenerationRequest):
 
@@ -37,7 +36,7 @@ async def generate(request: GenerationRequest):
         )
 
     # ======================================================
-    # PREPROCESS INPUTS (FINAL CLEAN VERSION)
+    # PREPROCESS INPUTS (FIXED ✅)
     # ======================================================
     inputs = request.inputs or {}
 
@@ -53,24 +52,30 @@ async def generate(request: GenerationRequest):
         print("🖼️ COLLECTED IMAGES:", images)
 
         # =========================================
-        # 🔥 VALIDATION
+        # 🔥 FEATURE-BASED VALIDATION
         # =========================================
-        if not images:
-            raise Exception("At least one image is required")
+        image_required_features = [
+            "image_to_video",
+            "background_remove",
+            "background_change",
+            "image_upscale",
+            "image_colorize"
+        ]
 
-        if len(images) > 5:
-            raise Exception("Maximum 5 images allowed")
+        if request.feature in image_required_features:
+            if not images:
+                raise Exception("At least one image is required")
 
-        # =========================================
-        # 🔥 NORMALIZATION (UNIVERSAL FORMAT)
-        # =========================================
+            if len(images) > 5:
+                raise Exception("Maximum 5 images allowed")
 
-        # For single-image models
-        inputs["image_url"] = images[0]
-        inputs["image"] = images[0]
+            # normalization only for image-based models
+            inputs["image_url"] = images[0]
+            inputs["image"] = images[0]
+            inputs["images"] = images
 
-        # For multi-image models
-        inputs["images"] = images
+        else:
+            print("ℹ️ No image required for this feature")
 
         print("🛠️ FINAL INPUTS:", inputs)
 
