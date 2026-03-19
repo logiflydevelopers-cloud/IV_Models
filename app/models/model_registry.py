@@ -5,7 +5,8 @@ from app.providers.fal.fal_video import (
     image_to_video_wan,
     image_to_video_kling_element,
     image_to_video_veo,
-    generate_character_video
+    generate_character_video,
+    text_to_video_kling_3
 )
 
 from app.providers.fal.fal_image import character_generation
