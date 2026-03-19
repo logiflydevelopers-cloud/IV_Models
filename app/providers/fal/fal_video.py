@@ -16,6 +16,7 @@ CHARACTER_VIDEO_MODEL = "fal-ai/wan/v2.2-a14b/image-to-video/lora"
 
 VEO_IMAGE_TO_VIDEO_MODEL_ID = "fal-ai/veo3.1/image-to-video"
 
+KLING3_MODEL_ID = "fal-ai/kling-video/v3/standard/text-to-video"
 # =========================================================
 # TEXT-TO-VIDEO
 # =========================================================
@@ -59,13 +60,14 @@ async def text_to_video_veo(inputs, settings):
     aspect_ratio = settings["aspect_ratio"]
     resolution = settings["resolution"]
     duration = settings["duration"]
+    generate_audio = settings["generate_audio"]
 
     arguments = {
         "prompt": prompt,
         "aspect_ratio": aspect_ratio,
         "duration": duration,
         "resolution": resolution,
-        "generate_audio": True
+        "generate_audio": generate_audio
     }
 
     try:
@@ -83,6 +85,41 @@ async def text_to_video_veo(inputs, settings):
 
     except Exception as e:
         raise RuntimeError(f"fal.ai Veo failed: {e}")
+    
+
+async def text_to_video_kling_3(inputs, settings):
+    prompt = inputs["prompt"]
+    aspect_ratio = settings["aspect_ratio"]
+    generate_audio = settings["generate_audio"]
+    duration = settings["duration"]
+
+    arguments = {
+        "prompt": prompt,
+        "aspect_ratio": aspect_ratio,
+        "duration": duration,
+        "generate_audio": generate_audio,
+        "generate_audio": True,
+        "multi_prompt": "null",
+        "negative_prompt": "blur, distort, and low quality",
+        "cfg_scale": 0.5,
+    }
+
+    try:
+        result = fal.run(
+            KLING3_MODEL_ID,
+            arguments=arguments
+        )
+
+        video = result.get("video")
+
+        if not video:
+            raise RuntimeError(f"No video returned from fal.ai: {result}")
+
+        return video["url"]
+
+    except Exception as e:
+        raise RuntimeError(f"fal.ai Veo failed: {e}")
+
     
 # =========================================================
 # IMAGE-TO-VIDEO

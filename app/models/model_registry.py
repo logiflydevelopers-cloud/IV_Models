@@ -33,7 +33,8 @@ MODEL_REGISTRY = {
     "text_to_video": {
         "kling_2_5": text_to_video_kling,
         "veo3": text_to_video_veo,
-        "luma_ray": text_to_video_luma
+        "luma_ray": text_to_video_luma,
+        "kling_3": text_to_video_kling_3
     },
 
     # =========================================
