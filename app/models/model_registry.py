@@ -32,70 +32,149 @@ MODEL_REGISTRY = {
     # TEXT → VIDEO
     # =========================================
     "text_to_video": {
-        "kling_2_5": text_to_video_kling,
-        "veo3": text_to_video_veo,
-        "luma_ray": text_to_video_luma,
-        "kling_3": text_to_video_kling_3
+        "kling_2_5": {
+            "handler": text_to_video_kling,
+            "provider": "fal",
+            "credit_cost": 5
+        },
+        "veo3": {
+            "handler": text_to_video_veo,
+            "provider": "fal",
+            "credit_cost": 6
+        },
+        "luma_ray": {
+            "handler": text_to_video_luma,
+            "provider": "replicate",
+            "credit_cost": 4
+        },
+        "kling_3": {
+            "handler": text_to_video_kling_3,
+            "provider": "fal",
+            "credit_cost": 7
+        }
     },
 
     # =========================================
     # IMAGE → VIDEO
     # =========================================
     "image_to_video": {
-        "wan_2_2": image_to_video_wan,
-        "kling_element": image_to_video_kling_element,
-        "hailuo": image_to_video_hailuo,
-        "anime_video": anime_video,
-        "veo_i2v": image_to_video_veo,
-        "character_video": generate_character_video
+        "wan_2_2": {
+            "handler": image_to_video_wan,
+            "provider": "fal",
+            "credit_cost": 5
+        },
+        "kling_element": {
+            "handler": image_to_video_kling_element,
+            "provider": "fal",
+            "credit_cost": 6
+        },
+        "hailuo": {
+            "handler": image_to_video_hailuo,
+            "provider": "replicate",
+            "credit_cost": 4
+        },
+        "anime_video": {
+            "handler": anime_video,
+            "provider": "replicate",
+            "credit_cost": 4
+        },
+        "veo_i2v": {
+            "handler": image_to_video_veo,
+            "provider": "fal",
+            "credit_cost": 6
+        },
+        "character_video": {
+            "handler": generate_character_video,
+            "provider": "fal",
+            "credit_cost": 7
+        }
     },
 
     # =========================================
     # IMAGE GENERATION
     # =========================================
     "image_generation": {
-        "realistic_character": character_generation,
-        "anime_character": anime_generation
+        "realistic_character": {
+            "handler": character_generation,
+            "provider": "fal",
+            "credit_cost": 3
+        },
+        "anime_character": {
+            "handler": anime_generation,
+            "provider": "replicate",
+            "credit_cost": 3
+        }
     },
 
     # =========================================
     # IMAGE EDIT
     # =========================================
     "image_edit": {
-        "character_edit": edit_character,
-        "anime_edit": edit_anime,
-        "nano_banana": image_edit
+        "character_edit": {
+            "handler": edit_character,
+            "provider": "fal",
+            "credit_cost": 2
+        },
+        "anime_edit": {
+            "handler": edit_anime,
+            "provider": "replicate",
+            "credit_cost": 2
+        },
+        "nano_banana": {
+            "handler": image_edit,
+            "provider": "fal",
+            "credit_cost": 2
+        }
     },
 
     # =========================================
     # BACKGROUND REMOVE
     # =========================================
     "background_remove": {
-        "bria": remove_background
+        "bria": {
+            "handler": remove_background,
+            "provider": "fal",
+            "credit_cost": 1
+        }
     },
 
     # =========================================
     # BACKGROUND CHANGE
     # =========================================
     "background_change": {
-        "fal_bg_change": change_background
+        "fal_bg_change": {
+            "handler": change_background,
+            "provider": "fal",
+            "credit_cost": 2
+        }
     },
 
     # =========================================
     # IMAGE UPSCALE
     # =========================================
     "image_upscale": {
-        "recraft": upscale_image
+        "recraft": {
+            "handler": upscale_image,
+            "provider": "replicate",
+            "credit_cost": 2
+        }
     },
 
     # =========================================
     # IMAGE COLORIZE
     # =========================================
     "image_colorize": {
-        "color_correction": color_correction,
-        "bw_colorize": bw_colorize
+        "color_correction": {
+            "handler": color_correction,
+            "provider": "fal",
+            "credit_cost": 2
+        },
+        "bw_colorize": {
+            "handler": bw_colorize,
+            "provider": "fal",
+            "credit_cost": 2
+        }
     }
-
 }
 
 
@@ -111,4 +190,20 @@ def get_model(feature: str, model: str):
             f"Invalid model '{model}' for feature '{feature}'"
         )
 
-    return feature_models[model]
+    return feature_models[model]["handler"]
+
+
+def get_model_registry():
+
+    clean_registry = {}
+
+    for feature, models in MODEL_REGISTRY.items():
+        clean_registry[feature] = {}
+
+        for model_name, data in models.items():
+            clean_registry[feature][model_name] = {
+                "provider": data.get("provider"),
+                "credit_cost": data.get("credit_cost")
+            }
+
+    return clean_registry

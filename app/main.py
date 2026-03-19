@@ -8,6 +8,7 @@ from app.core.config import settings
 # from app.routers.edit_router import router as edit_router
 # from app.routers.character_router import router as character_router
 from app.routers.generate_router import router as generate
+from app.routers.model_registry_router import router as model_registry_router
 
 
 # =========================================================
@@ -43,6 +44,7 @@ app.add_middleware(
 # app.include_router(edit_router)
 # app.include_router(character_router)
 app.include_router(generate)
+app.include_router(model_registry_router)
 
 
 # =========================================================
