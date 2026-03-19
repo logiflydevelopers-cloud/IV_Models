@@ -79,6 +79,8 @@ async def generate(request: GenerationRequest):
 
         print("🛠️ FINAL INPUTS:", inputs)
 
+        settings = request.settings or {}
+
     except Exception as e:
         print("❌ INPUT PROCESSING FAILED:", str(e))
         raise HTTPException(status_code=400, detail=str(e))
@@ -89,7 +91,7 @@ async def generate(request: GenerationRequest):
     try:
         print("⚡ RUNNING MODEL...")
 
-        result = await model_fn(inputs)
+        result = await model_fn(inputs, settings)
 
         print("✅ MODEL RESULT:", result)
 

@@ -47,14 +47,14 @@ def edit_character(image_url: list[str], prompt: str):
         raise RuntimeError(f"qwen-image-Edit failed: {e}")
     
 
-async def image_edit(inputs):
+async def image_edit(inputs, settings):
     try:
-        # ✅ Validate prompt
+        # Validate prompt
         prompt = inputs.get("prompt")
         if not prompt:
             raise ValueError("Prompt is required")
 
-        # ✅ Collect all images dynamically (image_1, image_2, ...)
+        # Collect all images dynamically (image_1, image_2, ...)
         images = [
             value for key, value in inputs.items()
             if key.startswith("image_") and value
@@ -62,14 +62,16 @@ async def image_edit(inputs):
 
         if not images:
             raise ValueError("At least one image is required")
+        
+        aspect_ratio = settings.get("aspect_ratio")
 
-        # ✅ Prepare payload for FAL
+        # Prepare payload for FAL
         arguments = {
             "prompt": prompt,
             "num_images": 1,
-            "aspect_ratio": "9:16",
-            "output_format": "png",
-            "image_urls": images,  # ✅ MUST be list
+            "aspect_ratio": aspect_ratio,
+            "output_format": "webp",
+            "image_urls": images, 
             "resolution": "1K",
             "limit_generations": True
         }

@@ -20,14 +20,16 @@ VEO_IMAGE_TO_VIDEO_MODEL_ID = "fal-ai/veo3.1/image-to-video"
 # TEXT-TO-VIDEO
 # =========================================================
 
-async   def text_to_video_kling(inputs):
+async   def text_to_video_kling(inputs, settings):
 
     prompt = inputs["prompt"]
+    duration = settings["duration"]
+    aspect_ratio = settings["aspect_ratio"]
 
     arguments = {
         "prompt": prompt,
-        "duration": 5,
-        "aspect_ratio": "9:16",
+        "duration": duration,
+        "aspect_ratio": aspect_ratio,
         "negative_prompt": "blur, distort, and low quality",
         "cfg_scale": 0.5
     }
@@ -51,15 +53,18 @@ async   def text_to_video_kling(inputs):
 # Veo 3 Model
 VEO3_MODEL_ID = "fal-ai/veo3/fast"
 
-async def text_to_video_veo(inputs):
+async def text_to_video_veo(inputs, settings):
 
     prompt = inputs["prompt"]
+    aspect_ratio = settings["aspect_ratio"]
+    resolution = settings["resolution"]
+    duration = settings["duration"]
 
     arguments = {
         "prompt": prompt,
-        "aspect_ratio": "9:16",
-        "duration": "6s",
-        "resolution": "720p",
+        "aspect_ratio": aspect_ratio,
+        "duration": duration,
+        "resolution": resolution,
         "generate_audio": True
     }
 
@@ -89,7 +94,7 @@ def extract_images(inputs):
         if key.startswith("image_") and value
     ]
 
-async def image_to_video_wan(inputs):
+async def image_to_video_wan(inputs, settings):
     try:
         prompt = inputs.get("prompt")
         if not prompt:
@@ -98,21 +103,24 @@ async def image_to_video_wan(inputs):
         images = extract_images(inputs)
         if not images:
             raise ValueError("At least one image is required")
+        
+        resolution = settings.get("resolution")
+        aspect_ratio = settings.get("aspect_ratio")
 
         arguments = {
             "prompt": prompt,
             "negative_prompt": "bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, malformed limbs, fused fingers, still picture, cluttered background, three legs, many people in the background, walking backwards",
-            "image_url": images[0],  # ✅ WAN supports single image
+            "image_url": images[0],
             "num_frames": 81,
             "frames_per_second": 16,
-            "resolution": "720p",
+            "resolution": resolution,
             "num_inference_steps": 30,
             "guide_scale": 5,
             "shift": 5,
             "enable_safety_checker": False,
             "enable_prompt_expansion": False,
             "acceleration": "regular",
-            "aspect_ratio": "9:16"
+            "aspect_ratio": aspect_ratio
         }
 
         result = fal.run(WAN_MODEL_ID, arguments=arguments)
@@ -125,7 +133,7 @@ async def image_to_video_wan(inputs):
     except Exception as e:
         raise RuntimeError(f"fal.ai WAN failed: {e}")
     
-async def image_to_video_kling_element(inputs):
+async def image_to_video_kling_element(inputs, settings):
     try:
         prompt = inputs.get("prompt")
         if not prompt:
@@ -134,12 +142,15 @@ async def image_to_video_kling_element(inputs):
         images = extract_images(inputs)
         if not images:
             raise ValueError("At least one image is required")
+        
+        duration = settings.get("duration")
+        aspect_ratio = settings.get("aspect_ratio")
 
         arguments = {
             "prompt": prompt,
-            "image_urls": images,  # ✅ MULTI IMAGE SUPPORT
-            "duration": 5,
-            "aspect_ratio": "9:16"
+            "image_urls": images,
+            "duration": duration,
+            "aspect_ratio": aspect_ratio
         }
 
         result = fal.run(KLING_ELEMENT_MODEL_ID, arguments=arguments)
@@ -153,7 +164,7 @@ async def image_to_video_kling_element(inputs):
         raise RuntimeError(f"fal.ai Kling Element failed: {e}")
     
 
-async def image_to_video_veo(inputs):
+async def image_to_video_veo(inputs, settings):
     try:
         prompt = inputs.get("prompt")
         if not prompt:
@@ -162,14 +173,19 @@ async def image_to_video_veo(inputs):
         images = extract_images(inputs)
         if not images:
             raise ValueError("At least one image is required")
+        
+        aspect_ratio = settings.get("aspect_ratio")
+        duration = settings.get("duration")
+        resolution = settings.get("resolution")
+        generate_audio = settings.get("generate_audio")
 
         arguments = {
             "prompt": prompt,
-            "aspect_ratio": "9:16",
-            "duration": "6s",
-            "resolution": "720p",
-            "generate_audio": True,
-            "image_url": images[0],  # ✅ single image
+            "aspect_ratio": aspect_ratio,
+            "duration": duration,
+            "resolution": resolution,
+            "generate_audio": generate_audio,
+            "image_url": images[0],
         }
 
         result = fal.run(VEO_IMAGE_TO_VIDEO_MODEL_ID, arguments=arguments)

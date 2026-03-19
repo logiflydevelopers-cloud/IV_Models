@@ -1,13 +1,12 @@
 from app.providers.fal.fal_client import fal
 
-
 # =========================================================
 # MODELS
 # =========================================================
 
-BRIA_BG_REMOVE_MODEL = "fal-ai/bria/background/remove"
+BW_COLORIZE_MODEL = "fal-ai/ddcolor"
 
-BG_DIFFUSION_MODEL = "fal-ai/image-editing/background-change"
+COLOR_CORRECTION = "fal-ai/image-editing/color-correction"
 
 
 
@@ -17,35 +16,27 @@ def extract_images(inputs):
         if key.startswith("image_") and value
     ]
 
-    # ✅ fallback (old payload support)
+    # fallback (old payload support)
     if not images and inputs.get("image_url"):
         images.append(inputs["image_url"])
 
     return images
 
-
 # =========================================================
-# BACKGROUND REMOVE
+# BLACK AND WHITE COLORIZE
 # =========================================================
 
-async def remove_background(inputs):
-    """
-    Remove background using BRIA model
-    """
-    try:
-        images = extract_images(inputs)
+async   def bw_colorize(inputs):
 
-        if not images:
-            raise ValueError("At least one image is required")
+    image_url = inputs["image_url"]
 
-        image_url = images[0] 
-
-        arguments = {
-            "image_url": image_url
+    arguments = {
+        "image_url": image_url
         }
 
+    try:
         result = fal.run(
-            BRIA_BG_REMOVE_MODEL,
+            BW_COLORIZE_MODEL,
             arguments=arguments
         )
 
@@ -58,40 +49,28 @@ async def remove_background(inputs):
         raise RuntimeError(f"Unexpected response: {result}")
 
     except Exception as e:
-        raise RuntimeError(f"fal.ai background removal failed: {e}")
+        raise RuntimeError(f"fal.ai background change failed: {e}")
 
 
 # =========================================================
-# BACKGROUND DIFFUSION / CHANGE
+# COLOR CORRECTION
 # =========================================================
 
-async def change_background(inputs):
-    """
-    Replace background using diffusion model
-    """
-    try:
-        prompt = inputs.get("prompt")
-        if not prompt:
-            raise ValueError("Prompt is required")
+async   def color_correction(inputs):
 
-        images = extract_images(inputs)
+    image_url = inputs["image_url"]
 
-        if not images:
-            raise ValueError("At least one image is required")
-
-        image_url = images[0]  
-
-        arguments = {
-            "image_url": image_url,
-            "prompt": prompt,
-            "guidance_scale": 3.5,
-            "num_inference_steps": 30,
-            "safety_tolerance": "2",
-            "output_format": "jpeg"
+    arguments = {
+        "image_url": image_url,
+        "guidance_scale": 3.5,
+        "num_inference_steps": 30,
+        "safety_tolerance": "2",
+        "output_format": "jpeg"
         }
 
+    try:
         result = fal.run(
-            BG_DIFFUSION_MODEL,
+            BW_COLORIZE_MODEL,
             arguments=arguments
         )
 

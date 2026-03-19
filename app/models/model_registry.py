@@ -11,6 +11,7 @@ from app.providers.fal.fal_video import (
 from app.providers.fal.fal_image import character_generation
 from app.providers.fal.fal_edit import edit_character, image_edit
 from app.providers.fal.fal_bg import remove_background, change_background
+from app.providers.fal.fal_colorize import bw_colorize, color_correction
 
 # Replicate Providers
 from app.providers.replicate.replicate_video import (
@@ -64,10 +65,6 @@ MODEL_REGISTRY = {
         "nano_banana": image_edit
     },
 
-    "couple_wallpaper": {
-        "nano_banana_1": image_edit
-    },
-
     # =========================================
     # BACKGROUND REMOVE
     # =========================================
@@ -87,6 +84,14 @@ MODEL_REGISTRY = {
     # =========================================
     "image_upscale": {
         "recraft": upscale_image
+    },
+
+    # =========================================
+    # IMAGE COLORIZE
+    # =========================================
+    "image_colorize": {
+        "color_correction": color_correction,
+        "bw_colorize": bw_colorize
     }
 
 }
