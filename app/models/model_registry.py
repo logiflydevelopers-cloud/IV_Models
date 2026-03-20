@@ -152,7 +152,7 @@ MODEL_REGISTRY = {
     # =========================================
     # IMAGE UPSCALE
     # =========================================
-    "image_upscale": {
+    "upscale": {
         "recraft": {
             "handler": upscale_image,
             "provider": "replicate",
@@ -163,7 +163,7 @@ MODEL_REGISTRY = {
     # =========================================
     # IMAGE COLORIZE
     # =========================================
-    "image_colorize": {
+    "colorize": {
         "color_correction": {
             "handler": color_correction,
             "provider": "fal",
