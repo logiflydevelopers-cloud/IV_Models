@@ -99,7 +99,7 @@ async def text_to_video_kling_3(inputs, settings):
         "duration": duration,
         "generate_audio": generate_audio,
         "generate_audio": True,
-        "multi_prompt": [prompt],
+        "multi_prompt": [{"prompt": prompt}],
         "negative_prompt": "blur, distort, and low quality",
         "cfg_scale": 0.5,
     }
