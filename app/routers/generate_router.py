@@ -44,10 +44,30 @@ async def generate(request: GenerationRequest):
 
     try:
         # =========================================
-        # 🔥 COLLECT ALL IMAGES (max 5)
+        # 🔥 COLLECT ALL IMAGES (UNIVERSAL)
         # =========================================
-        image_keys = [f"image_{i}" for i in range(1, 6)]
-        images = [inputs[k] for k in image_keys if k in inputs]
+        images = []
+
+        # 1. image_1 → image_5
+        for i in range(1, 6):
+            key = f"image_{i}"
+            if inputs.get(key):
+                images.append(inputs[key])
+
+        # 2. image_url (🔥 your current case)
+        if inputs.get("image_url"):
+            images.append(inputs["image_url"])
+
+        # 3. image (single generic key)
+        if inputs.get("image"):
+            images.append(inputs["image"])
+
+        # 4. images array (future-proof)
+        if isinstance(inputs.get("images"), list):
+            images.extend([img for img in inputs["images"] if img])
+
+        # ✅ remove duplicates
+        images = list(dict.fromkeys(images))
 
         print("🖼️ COLLECTED IMAGES:", images)
 
@@ -69,7 +89,9 @@ async def generate(request: GenerationRequest):
             if len(images) > 5:
                 raise Exception("Maximum 5 images allowed")
 
-            # normalization only for image-based models
+            # =========================================
+            # 🔥 NORMALIZE (STANDARD FORMAT)
+            # =========================================
             inputs["image_url"] = images[0]
             inputs["image"] = images[0]
             inputs["images"] = images
