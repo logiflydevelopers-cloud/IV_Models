@@ -26,7 +26,7 @@ def extract_images(inputs):
 # BLACK AND WHITE COLORIZE
 # =========================================================
 
-async   def bw_colorize(inputs):
+async   def bw_colorize(inputs, settings=None):
 
     image_url = inputs["image_url"]
 
@@ -56,7 +56,7 @@ async   def bw_colorize(inputs):
 # COLOR CORRECTION
 # =========================================================
 
-async   def color_correction(inputs):
+async   def color_correction(inputs, settings=None):
 
     image_url = inputs["image_url"]
 

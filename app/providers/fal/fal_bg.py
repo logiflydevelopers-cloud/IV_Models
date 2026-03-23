@@ -28,7 +28,7 @@ def extract_images(inputs):
 # BACKGROUND REMOVE
 # =========================================================
 
-async def remove_background(inputs):
+async def remove_background(inputs, settings=None):
     """
     Remove background using BRIA model
     """
@@ -65,7 +65,7 @@ async def remove_background(inputs):
 # BACKGROUND DIFFUSION / CHANGE
 # =========================================================
 
-async def change_background(inputs):
+async def change_background(inputs, settings=None):
     """
     Replace background using diffusion model
     """

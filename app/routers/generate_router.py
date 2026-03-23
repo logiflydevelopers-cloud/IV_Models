@@ -115,7 +115,7 @@ async def generate(request: GenerationRequest):
 
         result = await model_fn(inputs, settings)
 
-        print("✅ MODEL RESULT:", result)
+        print("✅ MODEL RESULT:", result)          
 
     except Exception as e:
         print("❌ MODEL EXECUTION FAILED")
