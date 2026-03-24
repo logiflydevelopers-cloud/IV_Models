@@ -14,7 +14,7 @@ def extract_images(inputs):
         if key.startswith("image_") and value
     ]
 
-    # ✅ fallback (old payload support)
+    # fallback (old payload support)
     if not images and inputs.get("image_url"):
         images.append(inputs["image_url"])
 
@@ -26,15 +26,19 @@ def extract_images(inputs):
 
 def upscale_image(inputs, settings=None):
 
-    image_url = extract_images(inputs)
+    images = extract_images(inputs)
 
-    if not image_url:
+    if not images:
         raise ValueError("Image URL is required")
 
+    # Replicate expects single image (string, not list)
+    image_url = images[0]
+
     try:
+        # FIX: pass dict directly (NO input=)
         output = replicate_client.run(
             UPSCALE_MODEL,
-            input={
+            {
                 "image": image_url
             }
         )
