@@ -6,11 +6,27 @@ from app.providers.replicate.replicate_client import replicate_client
 
 UPSCALE_MODEL = "recraft-ai/recraft-crisp-upscale"
 
+
+
+def extract_images(inputs):
+    images = [
+        value for key, value in inputs.items()
+        if key.startswith("image_") and value
+    ]
+
+    # ✅ fallback (old payload support)
+    if not images and inputs.get("image_url"):
+        images.append(inputs["image_url"])
+
+    return images
+
 # =========================================================
 # UPSCALE IMAGE
 # =========================================================
 
-def upscale_image(image_url: str):
+def upscale_image(inputs, settings=None):
+
+    image_url = extract_images(inputs)
 
     if not image_url:
         raise ValueError("Image URL is required")
