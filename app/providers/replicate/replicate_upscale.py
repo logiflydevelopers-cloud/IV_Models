@@ -24,7 +24,7 @@ def extract_images(inputs):
 # UPSCALE IMAGE
 # =========================================================
 
-def upscale_image(inputs, settings=None):
+async def upscale_image(inputs, settings=None):
 
     images = extract_images(inputs)
 
