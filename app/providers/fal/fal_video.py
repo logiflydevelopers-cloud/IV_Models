@@ -184,7 +184,7 @@ async def image_to_video_kling_element(inputs, settings):
 
         arguments = {
             "prompt": prompt,
-            "image_urls": images,
+            "input_image_urls": images,
             "duration": duration,
             "aspect_ratio": aspect_ratio
         }
