@@ -5,6 +5,7 @@ from app.schemas.generate_schema import GenerationRequest
 import traceback
 
 from app.models.model_registry import get_model
+from fal_client.client import FalClientHTTPError
 
 router = APIRouter(
     prefix="/ai",
@@ -117,14 +118,31 @@ async def generate(request: GenerationRequest):
 
         print("✅ MODEL RESULT:", result)          
 
+    except FalClientHTTPError as e:
+        print("❌ FAL ERROR:", e)
+
+        error_data = e.args[0] if e.args else str(e)
+
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "success": False,
+                "source": "fal.ai",
+                "error": error_data
+            }
+        )
+
     except Exception as e:
-        print("❌ MODEL EXECUTION FAILED")
-        traceback.print_exc()
+        print("❌ UNKNOWN ERROR:", e)
 
         raise HTTPException(
             status_code=500,
-            detail=f"Model execution failed: {str(e)}"
-        )
+            detail={
+                "success": False,
+                "source": "internal",
+                "error": str(e)
+        }
+    )
 
     # ======================================================
     # RESPONSE
