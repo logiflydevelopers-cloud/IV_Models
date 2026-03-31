@@ -98,7 +98,6 @@ async def text_to_video_kling_3(inputs, settings):
         "aspect_ratio": aspect_ratio,
         "duration": duration,
         "generate_audio": generate_audio,
-        "generate_audio": True,
         "negative_prompt": "blur, distort, and low quality",
         "cfg_scale": 0.5,
     }
@@ -168,7 +167,7 @@ async def image_to_video_wan(inputs, settings):
 
     except Exception as e:
         raise RuntimeError(f"fal.ai WAN failed: {e}")
-    
+
 async def image_to_video_kling_element(inputs, settings):
     try:
         prompt = inputs.get("prompt")
