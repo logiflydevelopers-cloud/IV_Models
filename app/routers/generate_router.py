@@ -55,7 +55,7 @@ async def generate(request: GenerationRequest):
                 images.append(inputs[key])
 
         # 2. image_url (🔥 your current case)
-        if inputs.get("image_url"):
+        if inputs.get("image_url") or inputs.get("image_urls"):
             images.append(inputs["image_url"])
 
         # 3. image (single generic key)
