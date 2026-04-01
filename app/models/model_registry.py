@@ -4,7 +4,7 @@ from app.providers.fal.fal_video import (
     text_to_video_veo,
     image_to_video_wan,
     image_to_video_kling_element,
-    image_to_video_veo,
+    image_to_video_kling_video_o3,
     generate_character_video,
     text_to_video_kling_3
 )
@@ -78,8 +78,8 @@ MODEL_REGISTRY = {
             "provider": "replicate",
             "credit_cost": 4
         },
-        "veo_i2v": {
-            "handler": image_to_video_veo,
+        "kling_video_o3": {
+            "handler": image_to_video_kling_video_o3,
             "provider": "fal",
             "credit_cost": 6
         },
