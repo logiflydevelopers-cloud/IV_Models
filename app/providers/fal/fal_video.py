@@ -214,10 +214,7 @@ async def image_to_video_kling_video_o3(inputs, settings):
 
         arguments = {
             "prompt": prompt,
-            "image_url": {
-                "path": "./viWaaegDRbgzhi4FIg7a5_gDrxQeBD.png",
-                "relativePath": "./viWaaegDRbgzhi4FIg7a5_gDrxQeBD.png"
-            },
+            "image_url": images[0],
             "end_image_url": None,
             "duration": duration,
             "multi_prompt": None,
