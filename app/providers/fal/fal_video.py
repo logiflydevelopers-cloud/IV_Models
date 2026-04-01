@@ -14,7 +14,7 @@ KLING_ELEMENT_MODEL_ID = "fal-ai/kling-video/v1.6/standard/elements"
 
 CHARACTER_VIDEO_MODEL = "fal-ai/wan/v2.2-a14b/image-to-video/lora"
 
-VEO_IMAGE_TO_VIDEO_MODEL_ID = "fal-ai/veo3.1/image-to-video"
+KLING_VIDEO_O3_IMAGE_TO_VIDEO_MODEL_ID = "fal-ai/kling-video/o3/pro/image-to-video"
 
 KLING3_MODEL_ID = "fal-ai/kling-video/v3/standard/text-to-video"
 # =========================================================
@@ -199,7 +199,7 @@ async def image_to_video_kling_element(inputs, settings):
         raise RuntimeError(f"fal.ai Kling Element failed: {e}")
     
 
-async def image_to_video_veo(inputs, settings):
+async def image_to_video_kling_video_o3(inputs, settings):
     try:
         prompt = inputs.get("prompt")
         if not prompt:
@@ -209,21 +209,23 @@ async def image_to_video_veo(inputs, settings):
         if not images:
             raise ValueError("At least one image is required")
         
-        aspect_ratio = settings.get("aspect_ratio")
         duration = settings.get("duration")
-        resolution = settings.get("resolution")
         generate_audio = settings.get("generate_audio")
 
         arguments = {
             "prompt": prompt,
-            "aspect_ratio": aspect_ratio,
+            "image_url": {
+                "path": "./viWaaegDRbgzhi4FIg7a5_gDrxQeBD.png",
+                "relativePath": "./viWaaegDRbgzhi4FIg7a5_gDrxQeBD.png"
+            },
+            "end_image_url": None,
             "duration": duration,
-            "resolution": resolution,
-            "generate_audio": generate_audio,
-            "image_url": images[0],
-        }
+            "multi_prompt": None,
+            "shot_type": "customize",
+            "generate_audio": generate_audio
+            }
 
-        result = fal.run(VEO_IMAGE_TO_VIDEO_MODEL_ID, arguments=arguments)
+        result = fal.run(KLING_VIDEO_O3_IMAGE_TO_VIDEO_MODEL_ID, arguments=arguments)
 
         if "video" in result:
             return result["video"]["url"]
@@ -232,7 +234,7 @@ async def image_to_video_veo(inputs, settings):
 
     except Exception as e:
         raise RuntimeError(f"fal.ai VEO failed: {e}")
-    
+        
 # =========================================================
 # CHARACTER IMAGE-TO-VIDEO
 # =========================================================
