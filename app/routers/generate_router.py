@@ -13,19 +13,8 @@ router = APIRouter(
 )
 
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks
-from uuid import uuid4
-
-
-# 🔥 temporary store (later Redis/DB use karjo)
-jobs = {}
-
-
-# ======================================================
-# GENERATE (NON-BLOCKING ✅)
-# ======================================================
 @router.post("/generate")
-async def generate(request: GenerationRequest, background_tasks: BackgroundTasks):
+async def generate(request: GenerationRequest):
 
     print("\n==================== 🚀 NEW REQUEST ====================")
     print("📥 FULL REQUEST:", request.dict())
@@ -34,37 +23,58 @@ async def generate(request: GenerationRequest, background_tasks: BackgroundTasks
     # GET MODEL
     # ======================================================
     try:
-        model_fn = get_model(request.feature, request.model)
+        model_fn = get_model(
+            request.feature,
+            request.model
+        )
         print("✅ MODEL FOUND:", request.feature, request.model)
 
     except ValueError as e:
         print("❌ MODEL LOOKUP FAILED:", str(e))
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+        )
 
     # ======================================================
-    # PREPROCESS INPUTS (SAME LOGIC ✅)
+    # PREPROCESS INPUTS (FIXED ✅)
     # ======================================================
     inputs = request.inputs or {}
 
+    print("📦 ORIGINAL INPUTS:", inputs)
+
     try:
+        # =========================================
+        # 🔥 COLLECT ALL IMAGES (UNIVERSAL)
+        # =========================================
         images = []
 
+        # 1. image_1 → image_5
         for i in range(1, 6):
             key = f"image_{i}"
             if inputs.get(key):
                 images.append(inputs[key])
 
-        if inputs.get("image_url"):
+        # 2. image_url (🔥 your current case)
+        if inputs.get("image_url") or inputs.get("image_urls"):
             images.append(inputs["image_url"])
 
+        # 3. image (single generic key)
         if inputs.get("image"):
             images.append(inputs["image"])
 
+        # 4. images array (future-proof)
         if isinstance(inputs.get("images"), list):
             images.extend([img for img in inputs["images"] if img])
 
+        # ✅ remove duplicates
         images = list(dict.fromkeys(images))
 
+        print("🖼️ COLLECTED IMAGES:", images)
+
+        # =========================================
+        # 🔥 FEATURE-BASED VALIDATION
+        # =========================================
         image_required_features = [
             "image_to_video",
             "background_remove",
@@ -80,87 +90,66 @@ async def generate(request: GenerationRequest, background_tasks: BackgroundTasks
             if len(images) > 5:
                 raise Exception("Maximum 5 images allowed")
 
+            # =========================================
+            # 🔥 NORMALIZE (STANDARD FORMAT)
+            # =========================================
             inputs["image_url"] = images[0]
             inputs["image"] = images[0]
             inputs["images"] = images
 
+        else:
+            print("ℹ️ No image required for this feature")
+
+        print("🛠️ FINAL INPUTS:", inputs)
+
         settings = request.settings or {}
 
     except Exception as e:
+        print("❌ INPUT PROCESSING FAILED:", str(e))
         raise HTTPException(status_code=400, detail=str(e))
 
     # ======================================================
-    # 🔥 CREATE JOB (IMPORTANT)
+    # RUN MODEL
     # ======================================================
-    job_id = str(uuid4())
-
-    jobs[job_id] = {
-        "status": "processing",
-        "result_url": None,
-        "error": None,
-        "feature": request.feature,
-        "model": request.model
-    }
-
-    # ======================================================
-    # RUN IN BACKGROUND (🔥 FIX)
-    # ======================================================
-    background_tasks.add_task(
-        run_generation_task,
-        job_id,
-        model_fn,
-        inputs,
-        settings
-    )
-
-    # 👉 immediate response (NO TIMEOUT)
-    return {
-        "job_id": job_id,
-        "status": "processing"
-    }
-
-
-# ======================================================
-# BACKGROUND TASK
-# ======================================================
-async def run_generation_task(job_id, model_fn, inputs, settings):
-
     try:
-        print(f"⚡ Running job: {job_id}")
+        print("⚡ RUNNING MODEL...")
 
         result = await model_fn(inputs, settings)
 
-        jobs[job_id]["status"] = "completed"
-        jobs[job_id]["result_url"] = result
-
-        print(f"✅ Job completed: {job_id}")
+        print("✅ MODEL RESULT:", result)          
 
     except FalClientHTTPError as e:
+        print("❌ FAL ERROR:", e)
+
         error_data = e.args[0] if e.args else str(e)
 
-        jobs[job_id]["status"] = "failed"
-        jobs[job_id]["error"] = {
-            "source": "fal.ai",
-            "error": error_data
-        }
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "success": False,
+                "source": "fal.ai",
+                "error": error_data
+            }
+        )
 
     except Exception as e:
-        jobs[job_id]["status"] = "failed"
-        jobs[job_id]["error"] = {
-            "source": "internal",
-            "error": str(e)
+        print("❌ UNKNOWN ERROR:", e)
+
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "success": False,
+                "source": "internal",
+                "error": str(e)
         }
+    )
 
-
-# ======================================================
-# STATUS API
-# ======================================================
-@router.get("/status/{job_id}")
-async def get_status(job_id: str):
-
-    job = jobs.get(job_id)
-
-    if not job:
-        raise HTTPException(status_code=404, detail="Job not found")
-
-    return job
+    # ======================================================
+    # RESPONSE
+    # ======================================================
+    return {
+        "status": "success",
+        "feature": request.feature,
+        "model": request.model,
+        "result_url": result
+    }
