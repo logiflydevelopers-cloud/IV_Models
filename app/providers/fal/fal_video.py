@@ -124,10 +124,34 @@ async def text_to_video_kling_3(inputs, settings):
 # =========================================================
 
 def extract_images(inputs):
-    return [
+    """
+    Normalize all possible image formats into a list
+    """
+
+    if not inputs:
+        return []
+
+    # ✅ 1. Preferred format (multi-image)
+    if "image_urls" in inputs and isinstance(inputs["image_urls"], list):
+        return [img for img in inputs["image_urls"] if img]
+
+    # ✅ 2. Single image
+    if "image_url" in inputs and inputs["image_url"]:
+        return [inputs["image_url"]]
+
+    # ✅ 3. Legacy format: image_1, image_2, etc.
+    images = [
         value for key, value in inputs.items()
         if key.startswith("image_") and value
     ]
+    if images:
+        return images
+
+    # ✅ 4. Fallback
+    if "image" in inputs and inputs["image"]:
+        return [inputs["image"]]
+
+    return []
 
 async def image_to_video_wan(inputs, settings):
     try:
