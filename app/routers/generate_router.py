@@ -16,7 +16,6 @@ router = APIRouter(
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from uuid import uuid4
 
-router = APIRouter()
 
 # 🔥 temporary store (later Redis/DB use karjo)
 jobs = {}
