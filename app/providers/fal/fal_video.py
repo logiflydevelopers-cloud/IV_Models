@@ -139,10 +139,12 @@ def extract_images(inputs):
     if "image_url" in inputs and inputs["image_url"]:
         return [inputs["image_url"]]
 
-    # ✅ 3. Legacy format: image_1, image_2, etc.
+    # ✅ 3. Legacy format: image_1, image_2 (IMPORTANT FIX)
     images = [
         value for key, value in inputs.items()
-        if key.startswith("image_") and value
+        if key.startswith("image_") 
+        and key != "image_urls"   # 🔥 FIX HERE
+        and value
     ]
     if images:
         return images

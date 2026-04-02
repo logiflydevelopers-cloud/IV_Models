@@ -9,16 +9,19 @@ UPSCALE_MODEL = "recraft-ai/recraft-crisp-upscale"
 
 
 def extract_images(inputs):
-    images = [
+    # Case 1: image_urls array (NEW FORMAT)
+    if "image_urls" in inputs and isinstance(inputs["image_urls"], list):
+        return inputs["image_urls"]
+
+    # Case 2: single image_url
+    if "image_url" in inputs:
+        return [inputs["image_url"]]
+
+    # Case 3: fallback (old dynamic keys)
+    return [
         value for key, value in inputs.items()
         if key.startswith("image_") and value
     ]
-
-    # fallback (old payload support)
-    if not images and inputs.get("image_url"):
-        images.append(inputs["image_url"])
-
-    return images
 
 # =========================================================
 # UPSCALE IMAGE
