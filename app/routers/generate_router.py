@@ -1,8 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from typing import Dict, Any
 from app.schemas.generate_schema import GenerationRequest
-import traceback
 
 from app.models.model_registry import get_model
 from fal_client.client import FalClientHTTPError
@@ -31,49 +28,61 @@ async def generate(request: GenerationRequest):
 
     except ValueError as e:
         print("❌ MODEL LOOKUP FAILED:", str(e))
-        raise HTTPException(
-            status_code=400,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=400, detail=str(e))
 
     # ======================================================
-    # PREPROCESS INPUTS (FIXED ✅)
+    # PREPROCESS INPUTS (FIXED + SAFE ✅)
     # ======================================================
     inputs = request.inputs or {}
-
     print("📦 ORIGINAL INPUTS:", inputs)
 
     try:
-        # =========================================
-        # 🔥 COLLECT ALL IMAGES (UNIVERSAL)
-        # =========================================
         images = []
 
+        # -----------------------------------------
         # 1. image_1 → image_5
+        # -----------------------------------------
         for i in range(1, 6):
             key = f"image_{i}"
             if inputs.get(key):
-                images.append(inputs[key])
+                images.append(str(inputs[key]))
 
-        # 2. image_url (🔥 your current case)
-        if inputs.get("image_url") or inputs.get("image_urls"):
-            images.append(inputs["image_url"])
+        # -----------------------------------------
+        # 2. image_url (string OR list)
+        # -----------------------------------------
+        if inputs.get("image_url"):
+            if isinstance(inputs["image_url"], list):
+                images.extend([str(img) for img in inputs["image_url"] if img])
+            else:
+                images.append(str(inputs["image_url"]))
 
-        # 3. image (single generic key)
+        # -----------------------------------------
+        # 3. image_urls (list)
+        # -----------------------------------------
+        if isinstance(inputs.get("image_urls"), list):
+            images.extend([str(img) for img in inputs["image_urls"] if img])
+
+        # -----------------------------------------
+        # 4. image (single fallback)
+        # -----------------------------------------
         if inputs.get("image"):
-            images.append(inputs["image"])
+            images.append(str(inputs["image"]))
 
-        # 4. images array (future-proof)
+        # -----------------------------------------
+        # 5. images (list fallback)
+        # -----------------------------------------
         if isinstance(inputs.get("images"), list):
-            images.extend([img for img in inputs["images"] if img])
+            images.extend([str(img) for img in inputs["images"] if img])
 
-        # ✅ remove duplicates
-        images = list(dict.fromkeys(images))
+        # -----------------------------------------
+        # ✅ CLEAN + DEDUPLICATE (SAFE)
+        # -----------------------------------------
+        images = list(dict.fromkeys(img for img in images if img))
 
         print("🖼️ COLLECTED IMAGES:", images)
 
         # =========================================
-        # 🔥 FEATURE-BASED VALIDATION
+        # FEATURE VALIDATION
         # =========================================
         image_required_features = [
             "image_to_video",
@@ -91,9 +100,10 @@ async def generate(request: GenerationRequest):
                 raise Exception("Maximum 5 images allowed")
 
             # =========================================
-            # 🔥 NORMALIZE (STANDARD FORMAT)
+            # ✅ NORMALIZE (STRICT STANDARD)
             # =========================================
-            inputs["image_url"] = images[0]
+            inputs["image_url"] = images[0]     # keep your standard
+            inputs["image_urls"] = images       # for multi-image models
             inputs["image"] = images[0]
             inputs["images"] = images
 
@@ -116,7 +126,7 @@ async def generate(request: GenerationRequest):
 
         result = await model_fn(inputs, settings)
 
-        print("✅ MODEL RESULT:", result)          
+        print("✅ MODEL RESULT:", result)
 
     except FalClientHTTPError as e:
         print("❌ FAL ERROR:", e)
@@ -141,8 +151,8 @@ async def generate(request: GenerationRequest):
                 "success": False,
                 "source": "internal",
                 "error": str(e)
-        }
-    )
+            }
+        )
 
     # ======================================================
     # RESPONSE
