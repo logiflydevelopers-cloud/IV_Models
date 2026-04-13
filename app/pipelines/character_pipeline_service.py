@@ -5,9 +5,8 @@ from app.providers.openai.prompt_builder import (
     generate_pipeline_prompts
 )
 
-from app.services.image_service import generate_image
-from app.services.edit_service import edit_image
-from app.services.video_service import generate_image_to_video
+# ✅ USE MODEL REGISTRY
+from app.models.model_registry import get_model
 
 
 # =========================================================
@@ -44,39 +43,47 @@ async def generate_character_pipeline(user_data: dict, style: str):
     video_prompt_2 = prompts["video_prompt_2"]
 
     # -----------------------------------------------------
-    # 3️⃣ SELECT MODEL BASED ON CHARACTER TYPE
+    # 3️⃣ SELECT MODEL BASED ON STYLE
     # -----------------------------------------------------
 
-    if  style == "anime":
+    if style == "anime":
         base_model = "anime_character"
         edit_model = "anime_edit"
         video_model = "anime_video"
-
     else:
         base_model = "realistic_character"
         edit_model = "character_edit"
         video_model = "character_video"
 
     # -----------------------------------------------------
-    # 4️⃣ GENERATE BASE IMAGE
+    # 4️⃣ GET HANDLERS FROM REGISTRY
     # -----------------------------------------------------
 
-    base_image = generate_image(base_model, base_image_prompt)
+    image_handler = get_model("image_generation", base_model)
+    edit_handler = get_model("image_edit", edit_model)
+    video_handler = get_model("image_to_video", video_model)
 
     # -----------------------------------------------------
-    # 5️⃣ GENERATE EDITED IMAGES (PARALLEL)
+    # 5️⃣ GENERATE BASE IMAGE (NON-BLOCKING)
+    # -----------------------------------------------------
+
+    base_image = await asyncio.to_thread(
+        image_handler,
+        base_image_prompt
+    )
+
+    # -----------------------------------------------------
+    # 6️⃣ GENERATE EDITED IMAGES (PARALLEL)
     # -----------------------------------------------------
 
     edit_tasks = [
         asyncio.to_thread(
-            edit_image,
-            edit_model,
+            edit_handler,
             base_image,
             edit_prompt_1
         ),
         asyncio.to_thread(
-            edit_image,
-            edit_model,
+            edit_handler,
             base_image,
             edit_prompt_2
         )
@@ -85,19 +92,17 @@ async def generate_character_pipeline(user_data: dict, style: str):
     edited_images = await asyncio.gather(*edit_tasks)
 
     # -----------------------------------------------------
-    # 6️⃣ GENERATE VIDEOS (PARALLEL)
+    # 7️⃣ GENERATE VIDEOS (PARALLEL)
     # -----------------------------------------------------
 
     video_tasks = [
         asyncio.to_thread(
-            generate_image_to_video,
-            video_model,
+            video_handler,
             edited_images[0],
             video_prompt_1
         ),
         asyncio.to_thread(
-            generate_image_to_video,
-            video_model,
+            video_handler,
             edited_images[1],
             video_prompt_2
         )
@@ -106,7 +111,7 @@ async def generate_character_pipeline(user_data: dict, style: str):
     videos = await asyncio.gather(*video_tasks)
 
     # -----------------------------------------------------
-    # 7️⃣ RETURN FINAL OUTPUT
+    # 8️⃣ RETURN FINAL OUTPUT
     # -----------------------------------------------------
 
     return {
