@@ -87,6 +87,11 @@ MODEL_REGISTRY = {
             "handler": generate_character_video,
             "provider": "fal",
             "credit_cost": 7
+        },
+        "veo_i2v": {
+            "handler": text_to_video_veo,
+            "provider": "fal",
+            "credit_cost": 7
         }
     },
 
