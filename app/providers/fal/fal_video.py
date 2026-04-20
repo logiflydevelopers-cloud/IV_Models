@@ -12,7 +12,7 @@ WAN_MODEL_ID = "fal-ai/wan/v2.2-a14b/image-to-video/lora"
 
 KLING_ELEMENT_MODEL_ID = "fal-ai/kling-video/v1.6/standard/elements"
 
-CHARACTER_VIDEO_MODEL = "fal-ai/wan/v2.2-a14b/image-to-video/lora"
+CHARACTER_VIDEO_MODEL = "fal-ai/bytedance/seedance/v1.5/pro/image-to-video"
 
 KLING_VIDEO_O3_IMAGE_TO_VIDEO_MODEL_ID = "fal-ai/kling-video/o3/pro/image-to-video"
 
@@ -52,7 +52,7 @@ async   def text_to_video_kling(inputs, settings):
         raise RuntimeError(f"fal.ai Kling 2.5 failed: {e}")
     
 # Veo 3 Model
-VEO3_MODEL_ID = "fal-ai/veo3/fast"
+VEO3_MODEL_ID = "fal-ai/veo3/fast/image-to-video"
 
 async def text_to_video_veo(inputs, settings):
 
@@ -265,20 +265,14 @@ async def image_to_video_kling_video_o3(inputs, settings):
 def generate_character_video(image_url: str, prompt: str):
     
     arguments = {
-        "prompt": prompt,
-        "negative_prompt": "bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, malformed limbs, fused fingers, still picture, cluttered background, three legs, many people in the background, walking backwards",
-        "image_url": image_url,
-        "num_frames": 81,
-        "frames_per_second": 16,
-        "resolution": "720p",
-        "num_inference_steps": 30,
-        "guide_scale": 5,
-        "shift": 5,
-        "enable_safety_checker": False,
-        "enable_prompt_expansion": False,
-        "acceleration": "regular",
-        "aspect_ratio": "auto"
-        }
+    "prompt": prompt,
+    "aspect_ratio": "9:16",
+    "resolution": "720p",
+    "duration": "5",
+    "enable_safety_checker": False,
+    "generate_audio": False,
+    "image_url": image_url
+    }
     
     try:
         result = fal.run(
@@ -293,4 +287,4 @@ def generate_character_video(image_url: str, prompt: str):
         return video["url"]
 
     except Exception as e:
-        raise RuntimeError(f"wan-v2.2 failed: {e}")
+        raise RuntimeError(f"Seedance Model failed: {e}")
