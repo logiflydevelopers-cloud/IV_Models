@@ -53,7 +53,7 @@ def generate_pipeline_prompts(base_prompt: str) -> dict:
         Guidelines:
         - Base image prompt should describe the character appearance, background scene and outfits clearly.
         - Edit prompts should change clothing, pose, background, or expression.
-        - Video prompts should describe motion or scene actions.
+        - Video prompts should describe motion or scene actions. The prompt should be designed for seedance 1.5 pro image to video model
         - First Video prompt should be based on the base_image_prompt and Second video prompt should be based on edit_prompt_1.
         - Keep prompts detailed but concise.
         - Characters, background and Outfits should be explicit for AI Girlfrien/Boyfriend. Somewhat Revealing, somewhat sensual.
